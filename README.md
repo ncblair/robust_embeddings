@@ -1,6 +1,5 @@
 # robust_embeddings
 
-From scripts run:
 `
-PYTHONPATH=.. python linear_mnist.py
+PYTHONPATH=.. python scripts/linear_mnist.py
 `
