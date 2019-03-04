@@ -4,6 +4,7 @@ from models.base import BaseModel
 
 class Linear(BaseModel):
 	def __init__(self, d, k):
+
 		# d is the dimension of the input
 		# k is the dimension of the output, number of classes
 		self.W = np.random.randn(d + 1, k)
