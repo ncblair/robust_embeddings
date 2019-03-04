@@ -31,11 +31,12 @@ class EmbedLayer(nn.Module):
 #				  shape : (100, 10) }
 #				]
 class BaseNetwork(nn.Module):
-	def __init__(self, layers):
+	def __init__(self, model_name, layers):
 		super(BaseNetwork, self).__init__()
 		self.convs = nn.ModuleList([])
 		self.fcs = nn.ModuleList([])
 		self.embs = nn.ModuleList([])
+		self.name = model_name
 		for l in layers:
 			if l["name"] == "fc":
 				self.fcs.append(nn.Linear(*l["shape"]))
@@ -58,7 +59,7 @@ class BaseNetwork(nn.Module):
 		return self.fcs[-1](x)
 
 
-	def train_model(self, train_loader, epochs, opt, criterion):
+	def train_model(self, train_loader, epochs, opt, criterion, save=True):
 		print("Training Model")
 		for epoch in range(epochs):
 			run_loss = 0.0
@@ -78,7 +79,15 @@ class BaseNetwork(nn.Module):
 					print('[%d, %5d] loss: %.5f' %
 						  (epoch + 1, i + 1, run_loss / (train_loader.batch_size)))
 					run_loss = 0.0
+		if save:
+			print("Saving model")
+			self.save_model(self.name + ".pt")
 
+	def save_model(self, PATH):
+		torch.save(self.state_dict(), PATH)
+
+	def load_model(self, PATH):
+		self.load_state_dict(torch.load(PATH))
 
 	# Temporary method for testing on Additive White Gaussian Noise
 	def eval_on_noise_AWGN(self, test_loader, sigmas):
@@ -110,7 +119,7 @@ if __name__ == "__main__":
 	test_dict = [{"name" : "conv", "shape" : (1, 8, 5)}, {"name": "emb", "shape": (8*12*12, 5000)},\
 				 {"name": "fc", "shape": (5000, 128)}, {"name": "fc", "shape": (128, 100)},\
 				 {"name": "fc", "shape": (100, 10)}]
-	net = BaseNetwork(test_dict)
+	net = BaseNetwork("test_model", test_dict)
 	# test_im = torch.randn(1,1,28,28)
 	# print(net(test_im))
 
@@ -125,5 +134,5 @@ if __name__ == "__main__":
 	optimizer = optim.SGD(net.parameters(), lr=0.05, momentum=0.9)
 	criterion = nn.CrossEntropyLoss()
 
-	net.train_model(train_loader, 5, optimizer, criterion)
-	net.eval_on_noise_AWGN(test_loader, torch.arange(0, 255, 5.0))
+	net.train_model(train_loader, 1, optimizer, criterion)
+	# net.eval_on_noise_AWGN(test_loader, torch.arange(0, 255, 5.0))
