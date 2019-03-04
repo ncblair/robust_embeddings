@@ -1,10 +1,6 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader
-import torchvision.datasets as datasets
-import torch.optim as optim
-import torchvision.transforms as transforms
 import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
@@ -101,29 +97,3 @@ class BaseNetwork(nn.Module):
 				accs.append(100 * correct / total)
 		plt.plot(sigmas.numpy(), accs)
 		plt.show()
-
-
-
-if __name__ == "__main__":
-	# test_dict = [{"name" : "conv", "shape" : (1, 8, 5)}, {"name" : "fc", "shape" : (8*12*12, 100)},\
-	# 			{"name" : "fc", "shape" : (100, 10)}]
-	test_dict = [{"name" : "conv", "shape" : (1, 8, 5)}, {"name": "emb", "shape": (8*12*12, 5000)},\
-				 {"name": "fc", "shape": (5000, 128)}, {"name": "fc", "shape": (128, 100)},\
-				 {"name": "fc", "shape": (100, 10)}]
-	net = BaseNetwork(test_dict)
-	# test_im = torch.randn(1,1,28,28)
-	# print(net(test_im))
-
-	transform = transforms.Compose(
-		[transforms.ToTensor(), transforms.Lambda(lambda x: 255*x)])
-	test_data = datasets.MNIST(root='./data', train=False, download=False, transform=transform)
-	train_data = datasets.MNIST(root='./data', train=True, download=False, transform=transform)
-
-	train_loader = DataLoader(dataset=train_data, batch_size=64, shuffle=True, num_workers=2)
-	test_loader = DataLoader(dataset=test_data, batch_size=64, shuffle=False, num_workers=1)
-
-	optimizer = optim.SGD(net.parameters(), lr=0.05, momentum=0.9)
-	criterion = nn.CrossEntropyLoss()
-
-	net.train_model(train_loader, 5, optimizer, criterion)
-	net.eval_on_noise_AWGN(test_loader, torch.arange(0, 255, 5.0))

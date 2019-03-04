@@ -1,5 +1,5 @@
 from models.linear import Linear
-# from models.linear import EmbeddingLinear
+
 from file_handling.load_datasets import load_mnist
 
 (X_train, Y_train), (X_test, Y_test) = load_mnist()
