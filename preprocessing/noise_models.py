@@ -1,2 +1,5 @@
-def additive_gaussian(image):
+
+
+
+def additive_gaussian(image_batch):
 	pass
