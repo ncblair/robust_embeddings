@@ -18,14 +18,7 @@ class EmbedLayer(nn.Module):
 
 # layers is a list of dictionaries containing information
 # on what layers should be added to the model
-# Ex: layers = [
-#				{ name : "conv",
-#				  shape : (1, 8, 5) } # Assumes max_pool after
-#               { name : "fc",
-#				  shape : (8*13*13, 100) }
-#				{ name : "fc",
-#				  shape : (100, 10) }
-#				]
+
 class BaseNetwork(nn.Module):
 	def __init__(self, model_name, shapes, layer_types):
 		super(BaseNetwork, self).__init__()
