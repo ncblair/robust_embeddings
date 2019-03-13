@@ -86,7 +86,7 @@ class BaseNetwork(nn.Module):
 		self.load_state_dict(torch.load(PATH))
 
 	# Temporary method for testing on Additive White Gaussian Noise
-	def eval_on_noise_AWGN(self, test_loader, sigmas):
+	def eval_on_noise_AWGN(self, test_loader, sigmas, graphics=False):
 		print("Evaluating model on AWGN")
 		accs = []
 		with torch.no_grad():
@@ -104,5 +104,8 @@ class BaseNetwork(nn.Module):
 					total += labels.size(0)
 					correct += (pred == labels).sum().item()
 				accs.append(100 * correct / total)
+		if not graphics:
+			return sigmas.numpy(), accs
+
 		plt.plot(sigmas.numpy(), accs)
 		plt.show()
