@@ -2,9 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f34ccd40-8896-4fe0-ad19-aa8bfa51358a" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/models/base_network.py" afterPath="$PROJECT_DIR$/models/base_network.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/fc_comparison.py" afterPath="$PROJECT_DIR$/scripts/fc_comparison.py" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/models/data/processed/test.pt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/models/data/processed/training.pt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/models/data/raw/t10k-images-idx3-ubyte" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/models/data/raw/t10k-labels-idx1-ubyte" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/models/data/raw/train-images-idx3-ubyte" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/models/data/raw/train-labels-idx1-ubyte" afterPath="" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
