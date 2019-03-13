@@ -27,19 +27,22 @@ class EmbedLayer(nn.Module):
 #				  shape : (100, 10) }
 #				]
 class BaseNetwork(nn.Module):
-	def __init__(self, model_name, layers):
+	def __init__(self, model_name, shapes, layer_types):
 		super(BaseNetwork, self).__init__()
 		self.convs = nn.ModuleList([])
 		self.fcs = nn.ModuleList([])
 		self.embs = nn.ModuleList([])
 		self.name = model_name
-		for l in layers:
-			if l["name"] == "fc":
-				self.fcs.append(nn.Linear(*l["shape"]))
-			elif l["name"] == "conv":
-				self.convs.append(nn.Conv2d(*l["shape"]))
-			elif l["name"] == "emb":
-				self.embs.append(EmbedLayer(*l["shape"]))
+
+		assert len(shapes) == len(layer_types)
+
+		for type_, shape in zip(layer_types, shapes):
+			if type_ == "fc":
+				self.fcs.append(nn.Linear(*shape))
+			elif type_ == "conv":
+				self.convs.append(nn.Conv2d(*shape))
+			elif type_ == "emb":
+				self.embs.append(EmbedLayer(*shape))
 			else:
 				print("Layer name not supported, ignoring")
 
