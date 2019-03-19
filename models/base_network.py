@@ -94,8 +94,14 @@ class BaseNetwork(nn.Module):
 			for data in test_loader:
 				images, labels = data
 
+
 				if noise_function:
-					images = torch.tensor(noise_function(images, severity)).float()
+					images = images.permute(0, 2, 3, 1)
+					images = torch.tensor([noise_function(i.numpy(), severity) for i in images]).float()
+					# images = torch.tensor(noise_function(images.numpy(), severity)).float()
+					# print(images.shape)
+					images = images.permute(0, 3, 1, 2)
+					# print(images.shape)
 
 				outputs = self.forward(images)
 				_, pred = torch.max(outputs.data, 1)
