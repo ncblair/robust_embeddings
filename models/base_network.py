@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
-from tqdm import tqdm
+from tqdm import tqdm_notebook as tqdm
 import matplotlib.pyplot as plt
 
 
@@ -25,6 +25,7 @@ class BaseNetwork(nn.Module):
 		self.convs = nn.ModuleList([])
 		self.fcs = nn.ModuleList([])
 		self.embs = nn.ModuleList([])
+		self.norms = nn.ModuleList([])
 		self.name = model_name
 
 		assert len(shapes) == len(layer_types)
@@ -36,6 +37,8 @@ class BaseNetwork(nn.Module):
 				self.convs.append(nn.Conv2d(*shape))
 			elif type_ == "emb":
 				self.embs.append(EmbedLayer(*shape))
+			elif type_ == "norm":
+				self.norms.append(nn.BatchNorm2d(*shape))
 			else:
 				print("Layer name not supported, ignoring")
 
@@ -43,6 +46,8 @@ class BaseNetwork(nn.Module):
 	def forward(self, x):
 		for c in self.convs:
 			x = F.max_pool2d(F.relu(c(x)),2)
+		if len(self.norms) != 0:
+			x = self.norms[0](x)
 		x = x.view(x.shape[0], -1)
 		for e in self.embs:
 			x = e(x)
@@ -71,9 +76,9 @@ class BaseNetwork(nn.Module):
 					print('[%d, %5d] loss: %.5f' %
 						  (epoch + 1, i + 1, run_loss / (train_loader.batch_size)))
 					run_loss = 0.0
-		if save:
-			print("Saving model")
-			self.save_model(self.name + ".pt")
+		# if save:
+		# 	print("Saving model")
+		# 	self.save_model(self.name + ".pt")
 
 	def save_model(self, PATH):
 		torch.save(self.state_dict(), PATH)
@@ -81,27 +86,31 @@ class BaseNetwork(nn.Module):
 	def load_model(self, PATH):
 		self.load_state_dict(torch.load(PATH))
 
-	# Temporary method for testing on Additive White Gaussian Noise
-	def eval_on_noise_AWGN(self, test_loader, sigmas, graphics=False):
-		print("Evaluating model on AWGN")
-		accs = []
+	def test_model_once(self, test_loader, noise_function, severity=1):
+		print("Evaluating model once")
 		with torch.no_grad():
-			for sd in tqdm(sigmas):
-				correct = 0
-				total = 0
-				for data in test_loader:
-					images, labels = data
-					noise = torch.randn_like(images) * sd
+			correct = 0
+			total = 0
+			for data in test_loader:
+				images, labels = data
 
-					noisy_images = images + noise
+				if noise_function:
+					images = torch.tensor(noise_function(images, severity)).float()
 
-					outputs = self.forward(noisy_images)
-					_, pred = torch.max(outputs.data, 1)
-					total += labels.size(0)
-					correct += (pred == labels).sum().item()
-				accs.append(100 * correct / total)
+				outputs = self.forward(images)
+				_, pred = torch.max(outputs.data, 1)
+				total += labels.size(0)
+				correct += (pred == labels).sum().item()
+		return 100*correct / total
+
+	def test_model(self, test_loader, noise_function, graphics=False):
+		accs = []
+		for severity in range(1,6):
+			accs.append(self.test_model_once(test_loader, noise_function, severity))
 		if not graphics:
-			return sigmas.numpy(), accs
+			return accs
 
-		plt.plot(sigmas.numpy(), accs)
+		plt.plot(range(1,6), accs)
+		plt.xlabel("Severity")
+		plt.ylabel("Accuracy")
 		plt.show()
