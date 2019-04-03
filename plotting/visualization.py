@@ -38,7 +38,7 @@ def class_activation_map(model, image, last_convolutional_layer, fc_layer, label
 	output = model(image)[0]
 	activations.remove()
 	prediction = torch.argmax(output)
-	f = activations.features[i]
+	f = activations.features
 	wc = fc_layer.weight.data[label].numpy()
 	M = np.tensordot(wc, f, axes=1)
 	M = M - np.min(M)
@@ -57,7 +57,7 @@ def class_activation_map(model, image, last_convolutional_layer, fc_layer, label
 	else:
 		plt.show()
 
-def tsne(images, labels, representation_layer, model, name):
+def tsne(images, labels, representation_layer, model, name=None):
 	activations = SaveFeatures(representation_layer)
 	outputs = model(images)
 	activations.remove()
@@ -70,4 +70,19 @@ def tsne(images, labels, representation_layer, model, name):
 	else:
 		plt.show()
 
+def visualize_activations(layer, model, image):
+	activations = SaveFeatures(representation_layer)
+	outputs = model(images)
+	activations.remove()
+	activations = np.squeeze(activations.features)
+	plt.scatter(activations[:, 0], activations[:, 1], c=labels)
+	plt.title("tsne embedding of supervised model learned representation")
+	if name:
+		plt.savefig(f"output/tsne/{name}")
+	else:
+		plt.show()
+	if name == None:
+		plt.show()
+	else:
+		plt.savefig(f"output/filters/{name}")
 
