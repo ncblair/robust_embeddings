@@ -7,13 +7,13 @@ import matplotlib.pyplot as plt
 
 
 class EmbedLayer(nn.Module):
-	def __init__(self, in_feat, out_feat):
+	def __init__(self, in_feat, out_feat, sigma=.0003):
 		super(EmbedLayer, self).__init__()
-		self.weight = nn.Parameter(torch.randn(in_feat, out_feat)*0.0001, requires_grad=False)
+		self.weight = nn.Parameter(torch.randn(in_feat, out_feat)*sigma, requires_grad=False)
 		self.bias = nn.Parameter(torch.randn(out_feat) * 2 * np.pi, requires_grad=False)
 
 	def forward(self, input):
-		return torch.cos(input @ self.weight + self.bias) * torch.sqrt(torch.tensor(2.0) / self.bias.shape[0])
+		return torch.cos(255 * input @ self.weight + self.bias) * torch.sqrt(torch.tensor(2.0) / self.bias.shape[0])
 
 
 class FlattenLayer(nn.Module):
@@ -119,7 +119,7 @@ class BaseNetwork1(nn.Sequential):
 						test_acc.append(self._accuracy(test_loader))
 						print(
 							f"epoch: {epoch + 1}, iteration: {i}, train acc: {train_acc[-1] :.2f}, "
-							f"test acc: {test_acc[-1] :.2f}, loss: {loss :.2f}")
+							f"test acc: {test_acc[-1] :.2f}, loss: {running_loss :.2f}")
 					else:
 						print(
 							f"epoch: {epoch + 1}, iteration: {i}, train acc: {train_acc[-1] :.2f}, "

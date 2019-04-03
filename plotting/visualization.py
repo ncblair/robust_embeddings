@@ -69,16 +69,16 @@ def tsne(images, labels, representation_layer, model, name=None):
 		plt.savefig(f"output/tsne/{name}")
 	else:
 		plt.show()
-
-def visualize_activations(images, labels, layer, model, name=None):
-	activations = SaveFeatures(layer)
-	outputs = model(images)
-	activations.remove()
-	activations = np.squeeze(activations.features)
-	plt.scatter(activations[:, 0], activations[:, 1], c=labels)
-	plt.title("tsne embedding of supervised model learned representation")
-	if name:
-		plt.savefig(f"output/activations/{name}")
-	else:
+		
+def visualize_filters(layer, name=None):
+	layer1 = layer.weight.data
+	supervised_filters = [f - np.min(f.numpy()) for f in layer1]
+	supervised_filters = np.array([f.numpy() / np.max(f.numpy()) for f in supervised_filters])[:, :3, :, :]
+	grid = torchvision.utils.make_grid(torch.Tensor(supervised_filters)).numpy()
+	plt.imshow(np.transpose(grid, (1, 2, 0)))
+	plt.axis("off")
+	if name == None:
 		plt.show()
+	else:
+		plt.savefig(f"output/filters/{name}")
 
