@@ -28,29 +28,109 @@ class BaseNetwork1(nn.Sequential):
 	def __init__(self, *args):
 		super(BaseNetwork1, self).__init__(*args)
 
-	def train_model(self, train_loader, epochs, opt, criterion, save=True):
-		print("Training Model")
-		for epoch in range(epochs):
-			run_loss = 0.0
+	# def train_model(self, train_loader, epochs, opt, criterion, save=True):
+	# 	print("Training Model")
+	# 	iterations = []
+	# 	losses = []
+	# 	train_acc = []
+	# 	for epoch in range(epochs):
+	# 		run_loss = 0.0
+	# 		for i, data in enumerate(tqdm(train_loader)):
+	# 			inputs, labels = data
+	# 			opt.zero_grad()
+	#
+	# 			outputs = self.forward(inputs)
+	#
+	# 			loss = criterion(outputs, labels)
+	# 			loss.backward()
+	#
+	# 			opt.step()
+	#
+	# 			run_loss += loss.item()
+	# 			if i % train_loader.batch_size == train_loader.batch_size - 1:
+	# 				print('[%d, %5d] loss: %.5f' %
+	# 					  (epoch + 1, i + 1, run_loss / (train_loader.batch_size)))
+	# 				run_loss = 0.0
+	# 				iterations.append(i + epoch * len(train_loader))
+	# 				losses.append(run_loss / train_loader.batch_size)
+	# 				train_acc.append(running_train_acc / print_every)
+	#
+	# 		if i % print_every == print_every - 1:  # print every 1000 mini-batches
+	#
+	#
+	#
+	# 			test_acc.append(accuracy(model, testloader))
+	# 			print(
+	# 				f"epoch: {epoch + 1}, iteration: {i}, train acc: {train_acc[-1] :.2f}, test acc: {test_acc[-1] :.2f}, loss: {loss :.2f}")
+	# 			running_train_acc = 0.0
+	# 			running_loss = 0.0
+	# 	# if save:
+	# 	# 	print("Saving model")
+	# 	# 	self.save_model(self.name + ".pt")
+
+	def _accuracy(self, dataloader):
+		total = 0.0
+		num_correct = 0.0
+		for data in dataloader:
+			inputs, labels = data
+			outputs = self.forward(inputs)
+			outputs = torch.argmax(outputs, 1)
+			total += len(outputs)
+			num_correct += torch.sum(outputs == labels).numpy()
+		accuracy = num_correct / total
+		return accuracy
+
+	def train_model(self, epochs, print_every, train_loader, test_loader, optimizer, criterion, scheduler=None, track_test_acc=False):
+		train_acc = [.1]
+		test_acc = [.1]
+		losses = []
+		iterations = [0]
+		for epoch in range(epochs):  # loop over the dataset multiple times
+			running_train_acc = 0
+			running_loss = 0
+			if scheduler is not None:
+				print(f"Learning Rate: {scheduler.get_lr()}")
 			for i, data in enumerate(tqdm(train_loader)):
+				# get the inputs
 				inputs, labels = data
-				opt.zero_grad()
+				# one_hot_labels = torch.zeros(labels.shape[0], 10)
+				# print(one_hot_labels.shape, labels.view(-1,1).shape)
+				# one_hot_labels.scatter_(1, labels.view(-1,1), 1)
+				# one_hot_labels = one_hot_labels.float()
+				# zero the parameter gradients
+				optimizer.zero_grad()
 
+				# forward + backward + optimize
 				outputs = self.forward(inputs)
-
+				# print(outputs)
+				# break
 				loss = criterion(outputs, labels)
 				loss.backward()
+				optimizer.step()
+				running_train_acc += torch.sum(torch.argmax(outputs, 1) == labels).numpy() / len(outputs)
+				running_loss += loss
 
-				opt.step()
+				# print statistics
+				if i % print_every == print_every - 1:  # print every 1000 mini-batches
+					iterations.append(i + epoch * len(train_loader))
+					losses.append(running_loss / print_every)
+					train_acc.append(running_train_acc / print_every)
+					if track_test_acc:
+						test_acc.append(self._accuracy(test_loader))
+						print(
+							f"epoch: {epoch + 1}, iteration: {i}, train acc: {train_acc[-1] :.2f}, "
+							f"test acc: {test_acc[-1] :.2f}, loss: {loss :.2f}")
+					else:
+						print(
+							f"epoch: {epoch + 1}, iteration: {i}, train acc: {train_acc[-1] :.2f}, "
+							f"loss: {loss :.6f}")
+					running_train_acc = 0.0
+					running_loss = 0.0
+			if scheduler is not None:
+				scheduler.step()
 
-				run_loss += loss.item()
-				if i % train_loader.batch_size == train_loader.batch_size - 1:
-					print('[%d, %5d] loss: %.5f' %
-						  (epoch + 1, i + 1, run_loss / (train_loader.batch_size)))
-					run_loss = 0.0
-		# if save:
-		# 	print("Saving model")
-		# 	self.save_model(self.name + ".pt")
+		print('Finished Training')
+		return train_acc, test_acc, losses, iterations
 
 	def save_model(self, PATH):
 		torch.save(self.state_dict(), PATH)
