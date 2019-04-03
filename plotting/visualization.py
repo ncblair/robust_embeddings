@@ -70,7 +70,7 @@ def tsne(images, labels, representation_layer, model, name=None):
 	else:
 		plt.show()
 
-def visualize_activations(layer, model, image, name=None):
+def visualize_activations(images, labels, layer, model, name=None):
 	activations = SaveFeatures(layer)
 	outputs = model(images)
 	activations.remove()
