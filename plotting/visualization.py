@@ -71,7 +71,7 @@ def tsne(images, labels, representation_layer, model, name=None):
 		plt.show()
 
 def visualize_activations(layer, model, image, name=None):
-	activations = SaveFeatures(representation_layer)
+	activations = SaveFeatures(layer)
 	outputs = model(images)
 	activations.remove()
 	activations = np.squeeze(activations.features)
