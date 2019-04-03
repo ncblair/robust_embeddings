@@ -70,7 +70,7 @@ def tsne(images, labels, representation_layer, model, name=None):
 	else:
 		plt.show()
 
-def visualize_activations(layer, model, image):
+def visualize_activations(layer, model, image, name=None):
 	activations = SaveFeatures(representation_layer)
 	outputs = model(images)
 	activations.remove()
@@ -78,11 +78,7 @@ def visualize_activations(layer, model, image):
 	plt.scatter(activations[:, 0], activations[:, 1], c=labels)
 	plt.title("tsne embedding of supervised model learned representation")
 	if name:
-		plt.savefig(f"output/tsne/{name}")
+		plt.savefig(f"output/activations/{name}")
 	else:
 		plt.show()
-	if name == None:
-		plt.show()
-	else:
-		plt.savefig(f"output/filters/{name}")
 
