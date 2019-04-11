@@ -66,3 +66,20 @@ def load_cifar(mode="torch"):
 
 	return train_loader, test_loader
 
+
+def load_tiny(path):
+	with open("path", "rb") as f:
+		tiny_data = pickle.load(f)
+	tiny_data["train"]["data"] = torch.stack([torch.Tensor(i) for i in tiny_data['train']['data']])
+	tiny_data["train"]["target"] = torch.Tensor(tiny_data['train']['target']).long()
+
+	tiny_data["test"]["data"] = torch.stack([torch.Tensor(i) for i in tiny_data['test']['data']])
+	tiny_data["test"]["target"] = torch.Tensor(tiny_data['test']['target']).long()
+
+	tiny_data["train"] = torch.utils.data.TensorDataset(tiny_data["train"]["data"], tiny_data["train"]["target"])
+	tiny_data["test"] = torch.utils.data.TensorDataset(tiny_data["test"]["data"], tiny_data["test"]["target"])
+
+	tiny_data["train"] = torch.utils.data.DataLoader(tiny_data["train"], batch_size=16, shuffle=True, num_workers=2)
+	tiny_data["test"] = torch.utils.data.DataLoader(tiny_data["test"], batch_size=1000, shuffle=False, num_workers=2)
+
+	return tiny_data["train"], tiny_data["test"]
